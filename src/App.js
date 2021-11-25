@@ -4,23 +4,65 @@ import Button from './components/button/Button';
 import style from './StyleApp';
 import Display from './components/display/Display';
 
+const defaultState = {
+  displayValue: '0',
+  clearDisplay: false,
+  operation: null,
+  values: [0, 0],
+  current: 0,
+};
+
 export default () => {
-  const [displayValue, setDisplayValue] = useState(0);
+  // const [displayValue, setDisplayValue] = useState('0');
+
+  const [initialState, setInitialState] = useState({
+    displayValue: '0',
+    clearDisplay: false,
+    operation: null,
+    values: [0, 0],
+    current: 0,
+  });
 
   const adicionarDigito = n => {
-    setDisplayValue(n);
+    if (n === '.' && initialState.displayValue.includes('.')) {
+      return 'deu ruim';
+    }
+
+    const clearDisplay =
+      initialState.displayValue === '0' || initialState.clearDisplay;
+
+    const currentValue = clearDisplay ? '' : initialState.displayValue;
+
+    console.warn(currentValue);
+
+    const displayValueFunc = currentValue + n;
+
+    setInitialState({displayValue: displayValueFunc});
+    setInitialState({
+      clearDisplay: false,
+    });
+
+    if (n !== '.') {
+      const newValue = parseFloat(displayValueFunc);
+      const values = [initialState.values];
+      values[initialState.current] = newValue;
+      setInitialState({
+        values: values,
+      });
+    }
+    setInitialState({displayValue: displayValueFunc});
   };
 
   const clearMemo = () => {
-    setDisplayValue('0');
+    setInitialState({...defaultState});
   };
 
   const setOperation = operation => {
     console.warn(operation);
   };
   return (
-    <View style={style.buttonsContainer}>
-      <Display value={displayValue} />
+    <SafeAreaView style={style.buttonsContainer}>
+      <Display value={initialState.displayValue} />
       <View style={style.buttons}>
         <Button label="AC" triple onClick={clearMemo} />
         <Button label="/" operation onClick={setOperation} />
@@ -40,6 +82,6 @@ export default () => {
         <Button label="." onClick={adicionarDigito} />
         <Button label="=" operation onClick={setOperation} />
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
